@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CPS Counter</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    #cpsCounter {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    #timer {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    #startButton {
+      font-size: 18px;
+      padding: 10px 20px;
+    }
+    #clickButton {
+      font-size: 24px;
+      padding: 20px 40px;
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    #clickButton:disabled {
+      background-color: #A9A9A9;
+      cursor: not-allowed;
+    }
+    #timerForm {
+      margin-top: 20px;
+    }
+    #timerInput {
+      font-size: 18px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+      text-align: center;
+      width: 60px;
+    }
+    #finalResult {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CPS Counter</h1>
+  <div id="cpsCounter">0 CPS</div>
+  <div id="timer">00:00:00</div>
+  <button id="startButton">Start</button>
+  <button id="clickButton" disabled>Click</button>
+
+  <form id="timerForm">
+    <label for="timerInput">Set Timer (sec):</label>
+    <input type="number" id="timerInput" min="1" value="30">
+    <button type="submit">Set</button>
+  </form>
+
+  <div id="finalResult"></div>
+
+  <script>
+    var startTime;
+    var endTime;
+    var clicks = 0;
+    var cpsCounterElement = document.getElementById("cpsCounter");
+    var timerElement = document.getElementById("timer");
+    var startButton = document.getElementById("startButton");
+    var clickButton = document.getElementById("clickButton");
+    var timerForm = document.getElementById("timerForm");
+    var timerInput = document.getElementById("timerInput");
+    var finalResultElement = document.getElementById("finalResult");
+    var timerInterval;
+
+    startButton.addEventListener("click", function() {
+      clicks = 0;
+      cpsCounterElement.textContent = "0 CPS";
+      startButton.disabled = true;
+      startButton.textContent = "Started";
+      clickButton.disabled = false;
+      timerElement.textContent = "00:00:00";
+      var duration = parseInt(timerInput.value) * 1000;
+      startTime = new Date().getTime();
+      endTime = startTime + duration;
+      timerInterval = setInterval(updateTimer, 1000);
+    });
+
+    clickButton.addEventListener("click", function() {
+      clicks++;
+      cpsCounterElement.textContent = clicks + " CPS";
+    });
+
+    timerForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      if (!startButton.disabled) {
+        clearInterval(timerInterval);
+        startButton.disabled = false;
+        startButton.textContent = "Start";
+      }
+    });
+
+    function updateTimer() {
+      var currentTime = new Date().getTime();
+      var elapsedTime = endTime - currentTime;
+
+      if (elapsedTime < 0) {
+        clearInterval(timerInterval);
+        clickButton.disabled = true;
+        startButton.disabled = false;
+        startButton.textContent = "Restart";
+        displayFinalResult();
+        return;
+      }
+
+      var seconds = Math.floor(elapsedTime / 1000) % 60;
+      var minutes = Math.floor(elapsedTime / (1000 * 60)) % 60;
+      var hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+
+      timerElement.textContent = formatTime(hours) + ":" + formatTime(minutes) + ":" + formatTime(seconds);
+    }
+
+    function formatTime(time) {
+      return time < 10 ? "0" + time : time;
+    }
+
+    function displayFinalResult() {
+      var cps = clicks / (parseInt(timerInput.value));
+      finalResultElement.textContent = "Final CPS: " + cps.toFixed(2);
+    }
+  </script>
+</body>
+</html>
